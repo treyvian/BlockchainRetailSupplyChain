@@ -1,3 +1,6 @@
+var distributerAddress = "0x029bF2184C3Cbf7aD74B8E69b421EF4381266813";
+var retailerAddress = "0x585b685e48718949176b60b141C32Aed93379F06";
+
 App = {
   web3Provider: null,
   contracts: {},
@@ -25,7 +28,7 @@ App = {
 	}
 	// If no injected web3 instance is detected, fall back to Ganache
 	else {
-	  App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
+	  App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
 	}
 	web3 = new Web3(App.web3Provider);
 
@@ -111,8 +114,7 @@ App = {
 	  }
 
 	  var account = accounts[0];
-
-	  var distributerAddress = "0x8c24E5ef7f6Edf9858B7e4A7D886BB94110d4b04";
+	  
 	  App.contracts.RetailSupplyChain.deployed().then(function(instance) {
 		manufacInstance = instance;
 		manufacInstance.shipProduct.sendTransaction(productID, agency, destAddr, 0, distributerAddress).then(function(hash) {
@@ -149,7 +151,6 @@ App = {
 	  }
 
 	var account = accounts[0];
-	var retailerAddress = "0x27AE28a5ff997e406C1a7754ee6cD6451bb574CB";
 	App.contracts.RetailSupplyChain.deployed().then(function(instance) {
 		distInstance = instance;
 		distInstance.shipProduct.sendTransaction(productID, agency, destAddr, 1, retailerAddress).then(function(hash) {

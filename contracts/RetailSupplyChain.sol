@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.8.0;
 
 contract RetailSupplyChain {
     address payable productOwner;
@@ -40,7 +40,7 @@ contract RetailSupplyChain {
         require (msg.sender == distributer);
     }
 
-    constructor() public {
+    constructor() {
        
     }
     bytes32[] internal trackByteArray; 
@@ -61,9 +61,9 @@ contract RetailSupplyChain {
         inventory[productID].productName = productName;
         inventory[productID].brand = brand;
 		inventory[productID].location = location;
-		inventory[productID].dateTime = now;
-        inventory[productID].owner = msg.sender;
-		TrackDetails memory track = TrackDetails("Manufacturing Unit", location, "Product Manufactured",now);
+		inventory[productID].dateTime = block.timestamp;
+        inventory[productID].owner = payable(msg.sender);
+		TrackDetails memory track = TrackDetails("Manufacturing Unit", location, "Product Manufactured",block.timestamp);
     	trackInfo.push(track);
 		trackInfoMap[productID] = trackInfo;
     }
@@ -80,11 +80,11 @@ contract RetailSupplyChain {
         if (partType == Participants.manufacturer) {
 			isSeller();
 			distributer = ownerAddr;
-		    track = TrackDetails("Manufacturer", destAddress, "Product Shipped", now);
+		    track = TrackDetails("Manufacturer", destAddress, "Product Shipped", block.timestamp);
         } else if (partType == Participants.distributer) {
 		    isDistributer();
 			retailer = ownerAddr;
-            track = TrackDetails("Distributer", destAddress, "Product Shipped", now);
+            track = TrackDetails("Distributer", destAddress, "Product Shipped", block.timestamp);
         }
 		// Transfer ownership
         inventory[productID].owner = ownerAddr;
@@ -102,7 +102,7 @@ contract RetailSupplyChain {
 		
 		inventory[productID].price = price;
         TrackDetails memory track;
-        track = TrackDetails("Retailer", destAddress, "Product Shipped", now);
+        track = TrackDetails("Retailer", destAddress, "Product Shipped", block.timestamp);
     	trackInfo.push(track);
 		trackInfoMap[productID] = trackInfo;
     }
@@ -141,7 +141,7 @@ contract RetailSupplyChain {
 		
 	    require(productDetails.productID == productID);
 		if (partType == Participants.customer) {
-			track = TrackDetails("Customer", destAddress, description, now);
+			track = TrackDetails("Customer", destAddress, description, block.timestamp);
 			trackInfo.push(track);
 			trackInfoMap[productID] = trackInfo;
 		}
@@ -160,10 +160,10 @@ contract RetailSupplyChain {
         require(_seller != msg.sender);
 
         // Pay the seller by sending them Ether
-        address(_seller).transfer(msg.value);
+        payable(address(_seller)).transfer(msg.value);
 
 		// Transfer ownership to the buyer
-        inventory[_productID].owner = msg.sender;
+        inventory[_productID].owner = payable(msg.sender);
     }
 	function getSellerAddress(uint _productID) public view returns (address){
 		return inventory[_productID].owner;
