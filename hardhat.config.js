@@ -21,7 +21,10 @@ module.exports = {
       chainId: 1074,
       accounts: 
       [
-        process.env.PRIVATE_KEY1
+        process.env.PRIVATE_KEY1,
+        process.env.PRIVATE_KEY2,
+        process.env.PRIVATE_KEY3,
+        process.env.PRIVATE_KEY4
       ],
       timeout: 60000
     }
