@@ -34,17 +34,22 @@ App = {
 	},
 
 	initContract: function() {
-		$.getJSON(require('RetailSupplyChain'), function(data) {
-			// Get the necessary contract artifact file and instantiate it with truffle-contract
-			var RetailSupplyChainArtifact = data;
-			App.contracts.RetailSupplyChain = TruffleContract(RetailSupplyChainArtifact);
-	  
-			// Set the provider for our contract
-			App.contracts.RetailSupplyChain.setProvider(App.web3Provider);
-	  
-			// Use our contract to retrieve and mark the adopted pets
-			//return App.markAdopted();
-		});
+
+		web3.eth.Contract.setProvider('http://localhost:8545');
+
+
+		// To change based on your smartcontract
+		const contract_add_deployed = '0x1Ee18EFe7bBd127B6e0d34358c80688e079469A4';
+
+		// Get the deployed contract instance
+		var contract = new web3.eth.Contract(abi, contract_add_deployed);
+
+		App.contracts.RetailSupplyChain = contract;
+		console.log(App.contracts.RetailSupplyChain)
+
+		// Set the provider for our contract
+		App.contracts.RetailSupplyChain.setProvider(App.web3Provider);
+
 		return App.bindEvents();
 	},
 
@@ -62,25 +67,17 @@ App = {
 	handleManufacturer: function(event) {
 		event.preventDefault();
 
-		console.log('premuto');
-
 		var productID = document.getElementById('productIDM').value;
 		var product = document.getElementById('productM').value;
 		var brand = document.getElementById('brandM').value;
 		var locationM = document.getElementById('locationM').value;
 		
-		var manufacInstance;
-
-		web3.eth.getAccounts(function(error, accounts) {
-		if (error) {
-			console.log(error);
-		}
-		console.log(accounts);
-		var account = accounts[0];
-		App.contracts.RetailSupplyChain.deployed().then(function(instance) {
-			manufacInstance = instance; 
+		// TODO: Hide the private key
+		const manufacturerAccount = web3.eth.accounts.privateKeyToAccount('8667bac16679a3ca1247491657a19d762a0a207f033846f96e4fcce765889ed9').address;
+		var manufacInstance = App.contracts.RetailSupplyChain;
 			
-			manufacInstance.addProduct.sendTransaction(productID, product, brand, locationM).then(function(hash) {
+		manufacInstance.methods.addProduct(productID, product, brand, locationM).call({from: manufacturerAccount}).then(function(hash) {
+			console.log('Porcodio');
 			web3.eth.getTransaction(hash, function(err, tx) {
 				var t = "";
 				var tr = "<tr>";
@@ -92,11 +89,6 @@ App = {
 				t += tr;
 				document.getElementById("posts").innerHTML += t;
 			});
-		});
-		}).then(function(result) {
-		}).catch(function(err) {
-			console.log(err.message);
-		});
 		});
 	},
 	handleShipManufacturer: function(event) {
