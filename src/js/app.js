@@ -1,7 +1,9 @@
 App = {
 	web3Provider: null,
-	contracts: {},
-
+	contract: null,
+	deployedAddress: null,
+	
+	manufacturerAccount: null,
 
 	init: async function() {
 		return await App.initWeb3();
@@ -36,19 +38,21 @@ App = {
 	initContract: function() {
 
 		web3.eth.Contract.setProvider('http://localhost:8545');
-
+		
+		// TODO: Hide the private keys
+		App.manufacturerAccount = web3.eth.accounts.privateKeyToAccount('8667bac16679a3ca1247491657a19d762a0a207f033846f96e4fcce765889ed9');
 
 		// To change based on your smartcontract
-		const contract_add_deployed = '0x1Ee18EFe7bBd127B6e0d34358c80688e079469A4';
+		App.deployedAddress = '0x1Ee18EFe7bBd127B6e0d34358c80688e079469A4';
 
 		// Get the deployed contract instance
-		var contract = new web3.eth.Contract(abi, contract_add_deployed);
+		var contract = new web3.eth.Contract(abi, App.deployedAddress);
 
-		App.contracts.RetailSupplyChain = contract;
-		console.log(App.contracts.RetailSupplyChain)
+		App.contract = contract;
+		console.log(App.contract)
 
 		// Set the provider for our contract
-		App.contracts.RetailSupplyChain.setProvider(App.web3Provider);
+		App.contract.setProvider(App.web3Provider);
 
 		return App.bindEvents();
 	},
@@ -71,25 +75,31 @@ App = {
 		var product = document.getElementById('productM').value;
 		var brand = document.getElementById('brandM').value;
 		var locationM = document.getElementById('locationM').value;
-		
-		// TODO: Hide the private key
-		const manufacturerAccount = web3.eth.accounts.privateKeyToAccount('8667bac16679a3ca1247491657a19d762a0a207f033846f96e4fcce765889ed9').address;
-		var manufacInstance = App.contracts.RetailSupplyChain;
-			
-		manufacInstance.methods.addProduct(productID, product, brand, locationM).call({from: manufacturerAccount}).then(function(hash) {
-			console.log('Porcodio');
-			web3.eth.getTransaction(hash, function(err, tx) {
-				var t = "";
-				var tr = "<tr>";
-				tr += "<td>"+"Manufacturer"+"</td>";
-				tr += "<td>"+document.getElementById('productIDM').value+"</td>";
-				tr += "<td>"+tx.hash+"</td>";
-				tr += "<td>"+"New Product Created!!"+"</td>";
-				tr += "</tr>";
-				t += tr;
-				document.getElementById("posts").innerHTML += t;
-			});
-		});
+
+
+		var BN = web3.utils.BN;
+		id = new BN(productID).toString();;
+
+		var data = App.contract.methods.addProduct(id, product, brand, locationM).encodeABI();
+		// var transaction = web3.eth.accounts.signTransaction({to: App.deployedAddress,
+		// 	data: data}, App.manufacturerAccount.privateKey);
+		// web3.eth.sendSignedTransaction(signedTransactionData).on('receipt', console.log);
+
+		// App.contract.methods.addProduct(productID, product, brand, locationM)
+		// 					.send({from: App.manufacturerAccount.address})
+		// 					.on('error', function(error, receipt) {console.log('PorcoDio')});
+		// 	web3.eth.getTransaction(hash, function(err, tx) {
+		// 		var t = "";
+		// 		var tr = "<tr>";
+		// 		tr += "<td>"+"Manufacturer"+"</td>";
+		// 		tr += "<td>"+document.getElementById('productIDM').value+"</td>";
+		// 		tr += "<td>"+tx.hash+"</td>";
+		// 		tr += "<td>"+"New Product Created!!"+"</td>";
+		// 		tr += "</tr>";
+		// 		t += tr;
+		// 		document.getElementById("posts").innerHTML += t;
+		// 	});
+		// });
 	},
 	handleShipManufacturer: function(event) {
 		event.preventDefault();
