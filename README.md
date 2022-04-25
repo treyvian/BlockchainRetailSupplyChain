@@ -1,6 +1,4 @@
-# Retail Supplychain using Ethereum Smart Contract
-
-This project showcases the tracking history , selling and purchasing of the product on blockchain using html + Truffle + Ethereum
+This fork of the original project is used to experiment with the newly implemented smart contract on the IOTA blockchain. While the OP used Truffle for testing and deploying of the smart contract, it is not available for the IOTA and had to pivot to Hardhat.
 
 #### Problems in Existing System
 ---
@@ -31,19 +29,18 @@ The transport agent updates the details of the destination customer address.
 
 #### Included Components
 ---
+- Wasp (IOTA)
 -  Solidity (Ethereum)
 -  Metamask  (Ethereum wallet)
--  Truffle (npm install -g truffle or on linux sudo npm install -g truffle)
+-  Hardhat
 -  Web3JS
--  Ganache
 
 #### Prerequisites
 ---
 - Nodejs v9.10 or above
-- Truffle v4.1.8 (core: 4.1.8) (http://truffleframework.com/docs/getting_started/installation)
-- Solidity v0.5.0
+- hardhat-ethers v2.0 or above
+- Solidity v0.8.0 or above
 - Metamask (https://metamask.io) /Ganache Wallet
-- Ganache App
 - npm install
 
 #### Deployment Steps:
@@ -57,9 +54,8 @@ cd RetailSupplyChainEthereum/
 Go to your project folder in terminal then execute :
 
 ```
-truffle compile
-truffle migrate (if second time, truffle migrate --reset)
-npm run dev
+npx hardhat compile
+npx hardhat run --network localhost scripts/deploy.js
 Connect Metamask to Ganache URL http://localhost:7545
 ```
 #### Application Workflow Diagram One
@@ -104,8 +100,7 @@ Connect Metamask to Ganache URL http://localhost:7545
 ---
 ![](img/CreateProduct.jpg)
 
-- Create Product -> Update all the details of the new product. Ensure in metamask you assign 0xcB41A243C998fB78e888478BE478EC2172FCa7a4 as manufacturer and click on the button.
-
+- Create Product -> Update all the details of the new product.
 
 #### Product Transactions Lists
 ---
@@ -118,7 +113,7 @@ Connect Metamask to Ganache URL http://localhost:7545
 ---
 ![](img/DistributerShipProduct.jpg)
 
-- Ship Product - Update all the details.Ensure in metamask you assign 0x8c24E5ef7f6Edf9858B7e4A7D886BB94110d4b04 as distributor and click on the button.
+- Ship Product - Update all the details.
 - Metamask account - Checkout for the metamask account details below.
 
 #### Product Tracking
@@ -138,26 +133,3 @@ Connect Metamask to Ganache URL http://localhost:7545
 ![](img/RetailerWalletAmountAfterAndBefore.jpg)
 
 - Retailer Wallet - Verify the amount added in the Metamask wallet
-
-#### Metamask Account Details
----
-In this project, various different account addresses are used for participants,
-Rename these accounts in metamask for doing transactions.
-
-1) Seller -> 0xcB41A243C998fB78e888478BE478EC2172FCa7a4
----
-![](img/MetamaskSeller.jpg)
-
-2) Distributer -> 0x8c24E5ef7f6Edf9858B7e4A7D886BB94110d4b04
----
-![](img/MetamaskDistributer.jpg)
-
-3) Retailer -> 0x27AE28a5ff997e406C1a7754ee6cD6451bb574CB
----
-![](img/MetamaskRetailer.jpg)
-
-4) Buyer -> 0x5AF02fdd6cEE461529B31Dde71A43c3e3c9ce750
----
-![](img/MetamaskBuyer.jpg)
-
-

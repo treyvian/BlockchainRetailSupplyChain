@@ -55,7 +55,6 @@ contract RetailSupplyChain {
     
 	function addProduct(uint productID, string memory productName, string memory brand, string memory location) public
     {
-	    require(inventory[productID].productID != productID);
 	    seller = msg.sender;
         inventory[productID].productID = productID;
         inventory[productID].productName = productName;

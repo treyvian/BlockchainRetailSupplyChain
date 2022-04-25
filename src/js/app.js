@@ -4,6 +4,8 @@ App = {
 	deployedAddress: null,
 	
 	manufacturerAccount: null,
+	distributerAccount: null,
+	retailerAccount: null,
 
 	init: async function() {
 		return await App.initWeb3();
@@ -41,6 +43,8 @@ App = {
 		
 		// TODO: Hide the private keys
 		App.manufacturerAccount = web3.eth.accounts.privateKeyToAccount('8667bac16679a3ca1247491657a19d762a0a207f033846f96e4fcce765889ed9');
+		App.distributerAccount = web3.eth.accounts.privateKeyToAccount('44315b8bb1ea416851065b2a3dd72541d4a1ef59f799275694fe342a1004c7db');
+		App.retailerAccount = web3.eth.accounts.privateKeyToAccount('59834eb1f8e7a6e23ab87d34089a563ab94bc1b9f79c3b8090996f4bddc49bf2');
 
 		// To change based on your smartcontract
 		App.deployedAddress = '0x1Ee18EFe7bBd127B6e0d34358c80688e079469A4';
@@ -76,30 +80,20 @@ App = {
 		var brand = document.getElementById('brandM').value;
 		var locationM = document.getElementById('locationM').value;
 
-
-		var BN = web3.utils.BN;
-		id = new BN(productID).toString();;
-
-		var data = App.contract.methods.addProduct(id, product, brand, locationM).encodeABI();
-		// var transaction = web3.eth.accounts.signTransaction({to: App.deployedAddress,
-		// 	data: data}, App.manufacturerAccount.privateKey);
-		// web3.eth.sendSignedTransaction(signedTransactionData).on('receipt', console.log);
-
-		// App.contract.methods.addProduct(productID, product, brand, locationM)
-		// 					.send({from: App.manufacturerAccount.address})
-		// 					.on('error', function(error, receipt) {console.log('PorcoDio')});
-		// 	web3.eth.getTransaction(hash, function(err, tx) {
-		// 		var t = "";
-		// 		var tr = "<tr>";
-		// 		tr += "<td>"+"Manufacturer"+"</td>";
-		// 		tr += "<td>"+document.getElementById('productIDM').value+"</td>";
-		// 		tr += "<td>"+tx.hash+"</td>";
-		// 		tr += "<td>"+"New Product Created!!"+"</td>";
-		// 		tr += "</tr>";
-		// 		t += tr;
-		// 		document.getElementById("posts").innerHTML += t;
-		// 	});
-		// });
+		App.contract.methods.addProduct({productID: parseInt(productID)}, {product: product}, {brand: brand}, {locationM: locationM})
+			.send({from: App.manufacturerAccount.address, gas: 21064}, function(error, hash){
+			web3.eth.getTransaction(hash, function(err, tx) {
+				var t = "";
+				var tr = "<tr>";
+				tr += "<td>"+"Manufacturer"+"</td>";
+				tr += "<td>"+document.getElementById('productIDM').value+"</td>";
+				tr += "<td>"+tx.hash+"</td>";
+				tr += "<td>"+"New Product Created!!"+"</td>";
+				tr += "</tr>";
+				t += tr;
+				document.getElementById("posts").innerHTML += t;
+			});
+		});
 	},
 	handleShipManufacturer: function(event) {
 		event.preventDefault();
@@ -108,19 +102,9 @@ App = {
 		var agency = document.getElementById('tAgency').value;
 		var destAddr = document.getElementById('destAddr').value;
 		
-		var manufacInstance;
-		
-		web3.eth.getAccounts(function(error, accounts) {
-		if (error) {
-			console.log(error);
-		}
 
-		var account = accounts[0];
-		var distributerAddress = "0x029bF2184C3Cbf7aD74B8E69b421EF4381266813";
-
-		App.contracts.RetailSupplyChain.deployed().then(function(instance) {
-			manufacInstance = instance;
-			manufacInstance.shipProduct.sendTransaction(productID, agency, destAddr, 0, distributerAddress).then(function(hash) {
+		App.contract.methods.shipProduct({productID: parseInt(productID)}, {transportAgencyName: agency}, {destAddress: destAddr}, {partType: 0}, {ownerAddr: App.distributerAccount.address})
+			.send({from: App.distributerAccount.address, gas: 21064}, function(error, hash){
 			web3.eth.getTransaction(hash, function(err, tx) {
 				var t = "";
 				var tr = "<tr>";
@@ -131,13 +115,10 @@ App = {
 				tr += "</tr>";
 				t += tr;
 				document.getElementById("posts").innerHTML += t;
+				console.log("Prova");
 			});
 			});
-		}).then(function(result) {
-		}).catch(function(err) {
-			console.log(err.message);
-		});
-		});
+
 	},
 	handleDistributer: function(event) {
 		event.preventDefault();
@@ -146,20 +127,8 @@ App = {
 		var agency = document.getElementById('transportD').value;
 		var destAddr = document.getElementById('destAddrD').value;
 
-		var distInstance;
-
-		web3.eth.getAccounts(function(error, accounts) {
-		if (error) {
-			console.log(error);
-		}
-
-		var account = accounts[0];
-		var retailerAddress = "0x585b685e48718949176b60b141C32Aed93379F06";
-
-		App.contracts.RetailSupplyChain.deployed().then(function(instance) {
-			distInstance = instance;
-			distInstance.shipProduct.sendTransaction(productID, agency, destAddr, 1, retailerAddress).then(function(hash) {
-				
+		App.contract.methods.shipProduct({productID: parseInt(productID)}, {transportAgencyName: agency}, {destAddress: destAddr}, {partType: 0}, {ownerAddr: App.retailerAccount.address})
+			.send({from: App.distributerAccount.address, gas: 21064}, function(error, hash){			
 			web3.eth.getTransaction(hash, function(err, tx) {
 				var t = "";
 				var tr = "<tr>";
@@ -171,29 +140,16 @@ App = {
 				t += tr;
 				document.getElementById("posts").innerHTML += t;
 			});
-			});
-		}).then(function(result) {
-		}).catch(function(err) {
-			console.log(err.message);
 		});
-		});
+
 	},
 	handleRetailTracking: function(event) {
 		event.preventDefault();
 
 		var productID = document.getElementById('productIDRT').value;	
-		var retailInstance;
-		web3.eth.getAccounts(function(error, accounts) {
-		if (error) {
-			console.log(error);
-		}
 
-		var account = accounts[0];
-		var len;
-		App.contracts.RetailSupplyChain.deployed().then(function(instance) {
-			retailInstance = instance;
-			return retailInstance.listAllTrackInfo.call(productID);		
-		}).then(function(result) {
+		App.contract.methods.listAllTrackInfo({productID: parseInt(productID)})
+			.call({from: App.retailerAccount.address, gas: 21064}, function(result) {
 			var t = "";
 			document.getElementById("trackInfo").innerHTML = t;
 			var newRow=document.getElementById('trackInfo').insertRow();
@@ -225,7 +181,6 @@ App = {
 			document.getElementById("trackInfo").innerHTML += t;	
 		}).catch(function(err) {
 			console.log(err.message);
-		});
 		});
 	},
 	handleRetailer: function(event) {
