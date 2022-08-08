@@ -10,18 +10,5 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@nomiclabs/hardhat-truffle5": "^2.0.4",
-    "@nomiclabs/hardhat-web3": "^2.0.0",
-    "hardhat": "^2.8.4",
-    "lite-server": "^2.6.1",
-    "web3": "^1.7.0"
-  },
-  "dependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.0.6",
-    "@nomiclabs/hardhat-ganache": "^2.0.1",
-    "dotenv": "^16.0.1",
-    "hardhat-ganache": "^1.0.1"
-  }
+  "license": "ISC"
 }

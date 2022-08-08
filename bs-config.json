@@ -1,9 +1,0 @@
-{
-  "server": {
-    "baseDir": ["./src", "./artifacts/contracts/SupplyChain.sol"]
-  },
-  "compilerOptions": {
-    "resolveJsonModule": true,
-    "esModuleInterop": true  
-  }
-}
