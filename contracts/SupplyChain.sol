@@ -1,238 +1,151 @@
 pragma solidity ^0.8.0;
 
-contract RetailSupplyChain {
+import './Ownable.sol';
+import './roles/ManufacturerRole.sol';
+import './roles/RetailerRole.sol';
 
-    enum Participants {
-        manufacturer,
-        distributer,
-        retailer,
-        customer
+contract RetailSupplyChain is Ownable, ManufacturerRole, RetailerRole {
+
+    // Define enum 'State' with the following values:
+    enum State{
+        for_sale,
+        purchased,    
+        shipped,         
+        Received               
     }
+
+    State constant default_state = State.for_sale;
 
     /*
     * Struct to model the product information
     */
-    struct Product {
-        uint productID;
+    struct Item {
+        uint upc;  // Universal Product Code (UPC)
         string productName;
-        string brand;
-        string location;
-        uint dateTime;
+        State item_state;
+
         uint price;
-        address payable owner;
+        address[] item_history;
     }
 
-    /*
-    * Struct to model the Shipment details
-    */
-    struct ShipmentDetails {
-		uint productID;
-		string transportAgencyName;
-		string destAddress;
-	}
+    // Define a public mapping 'items' that maps the UPC to an Item.
+    mapping (uint => Item) products;
 
-    /*
-    * Struct to model the tracking information
-    */
-    struct TrackDetails {
-		string owner;
-		string location;
-		string description;
-		uint time;
-	}
 
-    bytes32[] internal trackByteArray; 
-    TrackDetails[] internal trackInfo;
-    mapping (uint => Product) inventory;
-	mapping (uint => ShipmentDetails) shipmentInfo;
-	mapping (uint => TrackDetails[]) trackInfoMap;
-
-    address internal manufacturer;
-    address internal retailer;
-    address internal distributer; 
-
-    /*
-    * Defining default constructor
-    */
-    constructor() {}
-
-    /*
-    * Returns the current owner of the product 
-    */
-    function getOwnerAddress(uint _productID) public view returns (address){
-		return inventory[_productID].owner;
-	}
-
-    /*
-    * Allows the Manufacturer to create a new product and add * it to the inventory
-    */
-    function addProduct(uint productID, 
-                        string memory productName, 
-                        string memory brand, 
-                        string memory location) public {
-        
-        // Assurance that there is no other product with the same id
-        require(inventory[productID].productID != productID);
-
-        uint timestamp = block.timestamp;
-
-        manufacturer = msg.sender;
-
-        // Update product information
-        inventory[productID].productID = productID;
-        inventory[productID].productName = productName;
-        inventory[productID].brand = brand;
-		inventory[productID].location = location;
-		inventory[productID].dateTime = timestamp;
-        inventory[productID].owner = payable(msg.sender);
-
-        // Update tracking information
-        TrackDetails memory track = TrackDetails("Manufacturing Unit", location, "Product Manufactured", timestamp);
-    	trackInfo.push(track);
-		trackInfoMap[productID] = trackInfo;
-    }
-
-    /*
-    * Change the locaction of the product
-    */
-    function shipProduct(uint productID, 
-                         string memory transportAgencyName, string memory destAddress, 
-                         Participants partType, 
-                         address payable ownerAddr)  public { 
-        
-        require(inventory[productID].productID == productID);
-        
-        // Update tracking information and check requirements
-        TrackDetails memory track;
-        uint timestamp = block.timestamp;
-
-        if (partType == Participants.manufacturer) {
-			require(msg.sender == manufacturer);
-
-			distributer = ownerAddr;
-		    track = TrackDetails("Manufacturer", 
-                                 destAddress, 
-                                 "Product Shipped", 
-                                 timestamp);
-
-        } else if (partType == Participants.distributer) {
-		    require(msg.sender == distributer);
-
-			retailer = ownerAddr;
-            track = TrackDetails("Distributer", 
-                                 destAddress, 
-                                 "Product Shipped", 
-                                 timestamp);
+    modifier availableUPC(uint upc, uint8 quantity) {
+        for(uint8 i=0; i<quantity; i++){
+            require(bytes(products[upc+i].productName).length == 0);
         }
-        
-        shipmentInfo[productID].productID = productID;
-        shipmentInfo[productID].transportAgencyName = transportAgencyName;
-		shipmentInfo[productID].destAddress = destAddress;
-
-
-        // Transfer ownership
-        inventory[productID].owner = ownerAddr;
-    	trackInfo.push(track);
-		trackInfoMap[productID] = trackInfo;
-    }
-    
-    /*
-    * list the product on the market setting the price
-    */
-    function sellProduct(uint productID, 
-                         string memory transportAgencyName, string memory destAddress, 
-                         uint price) public {
-        
-        require(inventory[productID].productID == productID);
-        require(msg.sender == getOwnerAddress(productID));
-
-        // Updates product information
-        shipmentInfo[productID].productID = productID;
-        shipmentInfo[productID].transportAgencyName = transportAgencyName;
-		shipmentInfo[productID].destAddress = destAddress;
-
-        inventory[productID].price = price;
-
-        // Updates tracking information
-        inventory[productID].price = price;
-        TrackDetails memory track;
-        track = TrackDetails("Retailer", 
-                             destAddress, 
-                             "Product Shipped", 
-                             block.timestamp);
-    	trackInfo.push(track);
-		trackInfoMap[productID] = trackInfo;
-
-        //TrackInfo
+        _;
     }
 
-    /*
-    * Transfer the ownership of the product to the buyer
-    */
-    function buyProduct(uint _productID) public payable {
-        
-        Product memory _product = inventory[_productID];
-        
-        // Fetch the owner
-        address payable _seller = _product.owner;
-
-        require(msg.value >= _product.price);
-        require(_product.productID == _productID);
-
-        // Require that the buyer is not the seller
-        require(_seller != msg.sender);
-
-        // Pay the seller by sending them Ether
-        _seller.transfer(msg.value);
-
-        // Transfer ownership to the buyer
-        inventory[_productID].owner = payable(msg.sender);
+    // Define a modifer that checks to see if msg.sender == owner of the contract
+    modifier is_product_owner(uint upc) {
+        require(msg.sender == get_owner(upc));
+        _;
     }
 
-    /*
-    * Utils method
-    */
-    function stringToBytes32(string memory _source) internal pure returns (bytes32 result_) {
-        bytes memory tempEmptyStringTest = bytes(_source);
-        
-        if (tempEmptyStringTest.length == 0) {
-            return 0x0;
-        }
-    
-        assembly {
-            result_ := mload(add(_source, 32))
-        }
+    modifier is_correct_state(uint upc, State state){
+        require(products[upc].item_state == state);
+        _;
     }
 
-    /*
-    * Returns all the hystory for the product
-    */
-    function listAllTrackInfo(uint productID) public returns ( bytes32[] memory){
-        
-        TrackDetails[] memory trackDetails = trackInfoMap[productID];
-    	
-        uint iterator;
-        for(iterator = 0;iterator < trackInfoMap[productID].length; iterator++){
-            trackByteArray.push(stringToBytes32(trackDetails[iterator].owner));
-            trackByteArray.push(stringToBytes32(trackDetails[iterator].location));
-            trackByteArray.push(stringToBytes32(trackDetails[iterator].description));
-            trackByteArray.push(bytes32(trackDetails[iterator].time));
-        }
-        return trackByteArray;
+    // Define a modifier that checks if the paid amount is sufficient to cover the price
+    modifier paid_enough(uint _price) {
+        require(msg.value >= _price);
+        _;
     }
 
-    /*
-    * Return the current information of the product
-    */
-    function getTrackInfo(uint productID, uint index) public view returns(string memory owner, 
-                 string memory location, 
-                 string memory description, 
-                 uint time) {
-		TrackDetails[] memory trackDetails = trackInfoMap[productID];
-		
-        return (trackDetails[index].owner,
-                trackDetails[index].location,
-                trackDetails[index].description,
-                trackDetails[index].time);
-	}
+    function get_owner(uint upc) private view returns(address){
+        uint len = products[upc].item_history.length;
+        return products[upc].item_history[len - 1];
+    }
+
+    function get_prev_owner(uint upc) private view returns(address){
+        uint len = products[upc].item_history.length;
+        if (len > 1)
+            return products[upc].item_history[len - 2];
+        else
+            return products[upc].item_history[len - 1];
+    }
+
+    function get_manufacturer(uint upc) private view returns(address){
+            return products[upc].item_history[0];
+    }
+
+    function add_product(uint upc, string memory productName, uint8 quantity, uint price) public 
+                onlyManufacturer() 
+                availableUPC(upc, quantity) { 
+
+        for(uint8 i=0; i < quantity; i++) {
+            uint id = upc+1;
+            Item memory new_item;
+            new_item.upc = id;
+            new_item.price = price;
+            new_item.productName = productName;
+            new_item.item_state = default_state;
+            
+            products[id] = new_item;
+            //products[id].item_history.push(msg.sender);
+        }      
+    }
+
+    function buy_from_manufacturer(uint upc) public
+                                             payable
+                                             onlyRetailer()
+                                             paid_enough(products[upc].price){
+                
+        address payable owner_addr = payable(get_owner(upc));
+        owner_addr.transfer(products[upc].price);
+
+        products[upc].item_history.push(msg.sender); // update owner
+        products[upc].item_state = State.purchased; // update state
+    }
+
+    function ship_item (uint upc) public 
+                                  is_correct_state(upc, State.purchased){
+        require(msg.sender == get_prev_owner(upc));
+
+        products[upc].item_state = State.shipped;
+    }
+
+    function received_item(uint upc) public 
+                                     is_product_owner(upc)
+                                     is_correct_state(upc, State.shipped){
+        products[upc].item_state = State.Received;
+    }
+
+    function sell_item(uint upc, uint price) 
+                public
+                is_product_owner(upc)
+                is_correct_state(upc, State.Received) {
+        
+        products[upc].item_state = State.for_sale;
+        products[upc].price = price;
+    }
+
+    function buy_product(uint upc) 
+                public
+                payable
+                paid_enough(products[upc].price){
+
+        address payable owner_addr = payable(get_owner(upc));
+        owner_addr.transfer(products[upc].price);
+
+        products[upc].item_history.push(msg.sender); // update owner
+        products[upc].item_state = State.purchased; // update state
+
+    }
+
+    function get_history(uint upc) public
+                                   view
+                                   returns(address[] memory){
+        
+        return products[upc].item_history;
+    }
+
+    function remove_product(uint upc) public onlyOwner() {
+        require(bytes(products[upc].productName).length == 0);
+        delete products[upc];
+    }
 }
