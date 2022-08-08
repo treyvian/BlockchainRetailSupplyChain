@@ -1,250 +1,210 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
-	<head>
+<head>
+    <meta charset="UTF-8">
+    <title>SupplyChain interface</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    
+    <style>
+    table, th, td {
+        border: 0.1px solid black;
+    }
+    </style>
+</head>
 
-		<style>
-		body{
-			background: url('http://www.allwhitebackground.com/images/6/Beautiful-Powerpoint-Background-Pictures.jpg');
-			background-size: 100% 100%;
-		}
-		.center-div{
-			text-align: left;
-		}
-		table, th, td {
-			border: 0.1px solid black;
-		}
-		
-		</style>
-		
-	</head>
-	<body>
+<body class = "font">
 
-		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-		<!-- Include all compiled plugins (below), or include individual files as needed -->
-		
-		<script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-		<script src="js/abi.js"></script>
-		<script src="js/app.js"></script>
-		
-		<!-- Bootstrap -->
-
-		<h1 style="color: #2e6c80;"><span style="color: #800000;"><strong>Tracking of Products:</strong></span></h1>
-		<p style="text-align: center;">&nbsp;</p>
-		<table style="margin-left: auto; margin-right: auto;">
-		<tbody>
-		<tr>
-		<td style="width: 255.2px;" colspan="3">
-		<h1 style="text-align: center;"><span style="color: #993366;"><img src="Manufacturer-Distributer-Retailer.jpg" alt="" /></span></h1>
-		</td>
-		</tr>
-		<tr>
-		<td style="width: 255.2px;">
-		<table style="margin-left: auto; margin-right: auto;">
-		<tbody>
-		<tr>
-		<td style="width: 245.6px;" colspan="2">
-		<h1 style="text-align: center;"><span style="color: #993366;"> Manufacturer </span></h1>
-		</td>
-		</tr>
-		<tr>
-		<td style="width: 79.2px; text-align: center;"><label for="productIDM"> Product ID </label></td>
-		<td style="width: 160.8px;"><input id="productIDM" name="productIDM" type="text" /></td>
-		</tr>
-		<tr>
-		<td style="width: 79.2px; text-align: center;"><label for="productM"> Product</label></td>
-		<td style="width: 160.8px;"><input id="productM" name="productM" type="text" /></td>
-		</tr>
-		<tr>
-		<td style="width: 79.2px; text-align: center;"><label for="brandM">Brand</label></td>
-		<td style="width: 160.8px;"><input id="brandM" name="brandM" type="text" /></td>
-		</tr>
-		<tr>
-		<td style="width: 79.2px; text-align: center;"><label for="locationM">Location</label></td>
-		<td style="width: 160.8px;"><input id="locationM" name="locationM" type="text" /></td>
-		</tr>
-		<tr>
-		<td style="width: 245.6px; text-align: center;" colspan="2"><button class="btn btn-default btn-manufacturer" title="Ensure Metamask address as 0xcB41A24...a7a4" style="background-color: green; color: white;" type="button" data-id="0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Create Product &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</button>&nbsp;</td>
-		</tr>
-		<tr>
-		<td style="width: 79.2px; text-align: center;"><label for="tAgency">Transport Agency</label></td>
-		<td style="width: 164px;"><input id="tAgency" name="tAgency" type="text" /></td>
-		</tr>
-		<tr>
-		<td style="width: 79.2px; text-align: center;"><label for="destAddr">Destination Address</label></td>
-		<td style="width: 164px;"><input id="destAddr" name="destAddr" type="text" /></td>
-		</tr>
-		<tr>
-		<td style="width: 248.8px; text-align: center;" colspan="2"><button class="btn btn-default btn-shipM" title="Ensure Metamask address as 0xcB41A24...a7a4" style="background-color: green; color: white;" type="button" data-id="0">&nbsp;Ship Product&nbsp;</button></td>
-		</tr>
-		</tbody>
-		</table>
-		</td>
-		<td style="width: 255.2px;">
-		<table style="height: 215px;" width="252">
-		<tbody>
-		<tr>
-		<td style="width: 246.4px; text-align: center;" colspan="2">
-		<h1 style="text-align: center;"><span style="color: #0000ff;"><span style="color: #993366;">Distributer</span><strong>&nbsp;</strong></span></h1>
-		</td>
-		</tr>
-		<tr>
-		<td style="width: 80px; text-align: center;"><label for="productIDD">Product ID</label></td>
-		<td style="width: 160.8px;"><input id="productIDD" name="productIDD" type="text" /></td>
-		</tr>
-		<tr>
-		<td style="width: 80px; text-align: center;"><label for="transportD">Transport Agency</label></td>
-		<td style="width: 160.8px;"><input id="transportD" name="transportD" type="text" /></td>
-		</tr>
-		<tr>
-		<td style="width: 80px; text-align: center;"><label for="destAddrD">Destination Address</label></td>
-		<td style="width: 160.8px;"><input id="destAddrD" name="destAddrD" type="text" /></td>
-		</tr>
-		<tr>
-		<td style="width: 80px;">&nbsp;</td>
-		<td style="width: 160.8px;">&nbsp;</td>
-		</tr>
-		<tr>
-		<td style="width: 246.4px; text-align: center;" colspan="2"><button class="btn btn-default btn-distributer" title="Ensure Metamask address as 0x8c24E5e...4b04" style="background-color: green; color: white;" type="button" data-id="0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Ship Product&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</button>&nbsp;</td>
-		</tr>
-		</tbody>
-		</table>
-		</td>
-		<td style="width: 228.8px;">
-		<table>
-		<tbody>
-		<tr>
-		<td style="width: 245.6px; text-align: center;" colspan="2">
-		<h1><span style="color: #993366;">Retailer</span></h1>
-		</td>
-		</tr>
-		<tr>
-		<td style="width: 79.2px; text-align: center;"><label for="productIDRT">Product ID</label></td>
-		<td style="width: 160.8px;"><input id="productIDRT" name="productIDRT" type="text" /></td>
-		</tr>
-		<tr>
-		<td style="width: 245.6px; text-align: center;" colspan="2"><button class="btn btn-default btn-retailTracking" title="Ensure Metamask address as 0x27AE28a5...74CB" style="background-color: green; color: white;" type="button" data-id="0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Product Tracking Details&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</button>&nbsp;</td>
-		</tr>
-		</tbody>
-		</table>
-		</td>
-		</tr>
-		<tr>
-		<td style="width: 255.2px;" colspan="3">
-		<h1 style="text-align: center;"><span style="color: #993366;"><img src="Retail-Customer.jpg" alt="" /></span></h1>
-		</td>
-		</tr>
-		<tr>
-		<td style="width: 255.2px;">
-		<table width="252">
-		<tbody>
-		<tr>
-		<td colspan="2">
-		<h1 style="text-align: center;"><span style="color: #993366;">Retailer<strong>&nbsp;</strong></span></h1>
-		</td>
-		</tr>
-		<tr style="text-align: center;">
-		<td><label for="productIDR">Product ID</label></td>
-		<td><input id="productIDR" name="productIDR" type="text" /></td>
-		</tr>
-		<tr style="text-align: center;">
-		<td><label for="transportR">Transport Agency</label></td>
-		<td><input id="transportR" name="transportR" type="text" /></td>
-		</tr>
-		<tr style="text-align: center;">
-		<td><label for="destAddrR">Destination Address</label></td>
-		<td><input id="destAddrR" name="destAddrR" type="text" /></td>
-		</tr>
-		<tr style="text-align: center;">
-		<td><label for="priceR">Price</label></td>
-		<td style="width: 160.8px;"><input id="priceR" name="priceR" type="text" /></td>
-		</tr>
-		<tr style="text-align: center;">
-		<td colspan="2"><button class="btn btn-default btn-retailer" title="Ensure Metamask address as 0x27AE28a5...74CB" style="background-color: green; color: white;" type="button" data-id="0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Sell Product&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</button>&nbsp;</td>
-		</tr>
-		</tbody>
-		</table>
-		</td>
-		<td style="width: 255.2px; text-align: center;">&nbsp;
-		<h1><span style="color: #993366;">Transport Agent At Destination</span></h1>
-		<table width="254">
-		<tbody>
-		<tr>
-		<td style="width: 79.2px;"><label for="productIDC">Product ID</label></td>
-		<td style="width: 160.8px;"><input id="productIDC" name="productIDC" type="text" /></td>
-		</tr>
-		<tr style="text-align: center;">
-		<td><label for="destAddrC">Address</label></td>
-		<td><input id="destAddrC" name="destAddrC" type="text" /></td>
-		</tr>
-		<tr>
-		<td style="width: 245.6px;" colspan="2"><button class="btn btn-default btn-customer" style="background-color: green; color: white;" type="button" data-id="0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Update Track info&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</button>&nbsp;</td>
-		</tr>
-		</tbody>
-		</table>
-		</td>
-		<td style="width: 228.8px; text-align: center;">
-		<p>&nbsp;</p>
-		<p>&nbsp;</p>
-		<h1><span style="color: #993366;">Customer</span></h1>
-		<table width="254">
-		<tbody>
-		<tr>
-		<td><label for="productIDCT">Product ID</label></td>
-		<td><input id="productIDCT" name="productIDCT" type="text" /></td>
-		</tr>
-		<tr>
-		<td colspan="2"><button class="btn btn-default btn-customerTracking" style="background-color: green; color: white;" type="button" data-id="0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Product Tracking &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</button>&nbsp;</td>
-		</tr>
-		<tr>
-		<td><label for="amount">Amount</label></td>
-		<td><input id="amount" name="amount" type="text" /></td>
-		</tr>
-		<tr>
-		<td style="text-align: center;" colspan="2"><button class="btn btn-default btn-buy" title="Ensure any different Metamask address as customer" style="background-color: green; color: white;" type="button" data-id="0">&nbsp;Pay&nbsp;</button></td>
-		</tr>
-		</tbody>
-		</table>
-		</td>
-		</tr>
-		</tbody>
-		</table>
-		<p style="text-align: center;">&nbsp;</p>
-		<p style="text-align: center;">&nbsp;</p>
-		<table id="posts" style="height: 67px; float: left;" width="562" align="center">
-		<tbody>
-		<tr>
-		<th id="test" style="width: 139.2px; text-align: center;"><span style="color: #808000;">Owner</span></th>
-		<th style="width: 88.8px; text-align: center;"><span style="color: #808000;">Product ID</span></th>
-		<th style="width: 177.6px; text-align: center;"><span style="color: #808000;">Tx Hash</span></th>
-		<th style="width: 130.4px; text-align: center;"><span style="color: #808000;">Description</span></th>
-		</tr>
-		<tr>
-		<td id="productID" style="width: 139.2px;">&nbsp;</td>
-		<td id="hash" style="width: 88.8px;">&nbsp;</td>
-		<td id="nonce" style="width: 177.6px;">&nbsp;</td>
-		<td id="from" style="width: 130.4px;">&nbsp;</td>
-		</tr>
-		</tbody>
-		</table>
-		<table id="trackInfo" style="height: 67px; float: right;" width="562" align="center">
-		<tbody>
-		<tr>
-		<th id="test" style="width: 112px; text-align: center;"><span style="color: #993366;">Owner</span></th>
-		<th style="width: 144px; text-align: center;"><span style="color: #993366;">Location</span></th>
-		<th style="width: 130.4px; text-align: center;"><span style="color: #993366;">Description</span></th>
-		<th style="width: 87.2px; text-align: center;"><span style="color: #993366;">Time</span></th>
-		</tr>
-		<tr>
-		<td id="owner" style="width: 139.2px;">&nbsp;</td>
-		<td id="location" style="width: 88.8px;">&nbsp;</td>
-		<td id="description" style="width: 177.6px;">&nbsp;</td>
-		<td id="time" style="width: 130.4px;">&nbsp;</td>
-		</tr>
-		</tbody>
-		</table>
-		<p style="text-align: center;">&nbsp;</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="js/abi.js"></script>
+    <script src="js/app.js"></script>
 
 
-	</body>
+    <h1>Supply Chain Smart Contract</h1>
+    <div class="containerRoles">
+        <div class = "step">
+            <p class = "step"> Add Address to appropriate role</p>
+            <p class = "step" id = "divType"></p>
+            <div class = "outline"style = "display: flex;">
+                <button class = "button" data-id="1">Add Manufacturer</button>
+                <input id = "manufacturerID" class = "inputFeilds">
+                <p id = "isManufacturer" class = "inputFields"></p>
+        
+            </div>
+        
+            <div class = "outline" style = "display: flex;">
+                <button class = "button" data-id="2">Add Retailer</button>
+                <input id = "retailerID" class = "inputFeilds">
+                <p id = "isRetailer" class = "inputFields"></p>
+            </div>
+        </div>
+
+        <div class = "step">
+            <p class = "step"> In case you need to remove an Address from a role</p>
+            <p class = "step" id = "divType"></p>
+            <div class = "outline"style = "display: flex;">
+                <button class = "button" data-id="10">Remove Manufacturer</button>
+                <input id = "remmanufacturerID" class = "inputFeilds">
+                <p id = "isManufacturer" class = "inputFields"></p>
+        
+            </div>
+        
+            <div class = "outline" style = "display: flex;">
+                <button class = "button" data-id=11"">Remove Retailer</button>
+                <input id = "remretailerID" class = "inputFeilds">
+                <p id = "isRetailer" class = "inputFields"></p>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class = "step">
+            <h3>Manufacturer</h3>
+            <div class = "manufacturer">
+                <div>
+                    <label>
+                        UPC: <input id = "UPC" class = "inputFields" type="number">
+                    </label>
+                </div>
+                <div>  
+                    <label>
+                        Name: <input id = "name" class = "inputFields" type="text">
+                    </label>
+                </div>
+                <div>  
+                    <label>
+                        Qty.: <input id = "qty" class = "inputFields" type="number">
+                    </label>
+                </div>
+                <div>  
+                    <label>
+                        Price: <input id = "price" class = "inputFields" type="number">
+                    </label>
+                </div>
+            </div>
+            <div class = "outline" style="margin: 1%;">
+                <button class = "button" data-id="3"> Add Product</button>
+                <p id = "add_product" class = "font">
+                </p>
+            </div>
+        </div>
+
+        <div class = "step">
+            <h3>Buy Product</h3>
+            <div class = "Buy">
+                <div>
+                    <label>
+                        UPC: <input id = "UPC_buy" class = "inputFields" type="number">
+                    </label>
+                </div>
+            </div>
+            <div class = "outline" style="margin: 1%;">
+                <button class = "button" data-id="4"> Buy Product</button>
+                <p id = "buy_product" class = "font">
+                </p>
+            </div>
+        </div>
+
+        <div class = "step">
+            <h3>Ship Product</h3>
+            <div class = "Distributer info">
+                <div>
+                    <label>
+                        UPC: <input id = "UPC_ship" class = "inputFields" type="number">
+                    </label>
+                </div>
+            </div>
+            <div class = "outline" style="margin: 1%;">
+                <button class = "button" data-id="5"> Ship Product</button>
+                <p id = "pr" class = "font">
+                </p>
+            </div>
+        </div>
+
+        <div class = "step">
+            <h3>Confirm product received</h3>
+            <div class = "Distributer info">
+                <div>
+                    <label>
+                        UPC: <input id = "UPC_receive" class = "inputFields" type="number">
+                    </label>
+                </div>
+            </div>
+            <div class = "outline" style="margin: 1%;">
+                <button class = "button" data-id="6"> Received Product</button>
+                <p id = "pr" class = "font">
+                </p>
+            </div>
+        </div>
+
+        <div class = "step">
+            <h3>Sell Product</h3>
+            <div class = "Distributer info">
+                <div>
+                    <label>
+                        UPC: <input id = "UPC_sell" class = "inputFields" type="number">
+                    </label>
+                </div>
+                <div>  
+                    <label>
+                        Price: <input id = "Price_sell" class = "inputFields" type="text">
+                    </label>
+                </div>
+            </div>
+            <div class = "outline" style="margin: 1%;">
+                <button class = "button" data-id="7"> Sell Product</button>
+                <p id = "pr" class = "font">
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="containerProd">
+        <div class = "step">
+            <h3>Remove Product</h3>
+            <div class = "remove">
+                <div>
+                    <label>
+                        UPC: <input id = "UPC_remove" class = "inputFields" type="number">
+                    </label>
+                </div>
+            </div>
+            <div class = "outline" style="margin: 1%;">
+                <button class = "button" data-id="9"> Remove Product</button>
+                <p id = "buy_product" class = "font">
+                </p>
+            </div>
+        </div>
+
+        <p style="text-align: center;">&nbsp;</p>
+        <p style="text-align: center;">&nbsp;</p>
+        <table id="posts" style="height: 67px; float: left;" width="762" align="center">
+            <tbody>
+                <tr>
+                    <th style="width: 100px; text-align: center;"><span style="color: #808000;">UPC</span></th>
+                    <th style="width: 180.2px; text-align: center;"><span style="color: #808000;">Product Name</span></th>
+                    <th style="width: 100.0px; text-align: center;"><span style="color: #808000;">Price</span></th>
+                    <th style="width: 150.2px; text-align: center;"><span style="color: #808000;">Owner</span></th>
+                    <th style="width: 180.0px; text-align: center;"><span style="color: #808000;">Owner Address</span></th>
+                    <th style="width: 180.0px; text-align: center;"><span style="color: #808000;">State</span></th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class = "step">
+        <h3>Validate the authenticity of the product</h3>
+        <div class = "outline">
+            <div class = "contain">
+                <p class = 'font'>Universal Product Code (UPC):</p><input class = "inputFields" id = "upc_hist">
+            </div>
+        </div>
+        <div class = "outline" style="margin-top: 10px; margin-left: 10px;">
+            <button class = "button" data-id="12" style="height: 40px; margin: auto;">Fetch Item History</button>
+        </div>
+    </div>
+</body>
+
+
 </html>
+

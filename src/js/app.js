@@ -1,10 +1,48 @@
+function get_row_index(rows, row) {
+	var index = -1;
+	for (var i=0;i<rows.length; i++){
+		if ( rows[i] == row ){
+			index = i;
+			break;
+		}
+	}
+	return index;
+}
+
+function generate_table(len) {
+	// creates a <table> element and a <tbody> element
+	const tbl = document.createElement("table");
+	const tblBody = document.createElement("tbody");
+
+	const row = document.createElement("tr");
+
+	for (let j = 0; j < len; j++) {
+		// Create a <td> element and a text node, make the text
+		// node the contents of the <td>, and put the <td> at
+		// the end of the table row
+		const cell = document.createElement("td");
+		const cellText = document.createTextNode(`column ${j}`);
+		cell.appendChild(cellText);
+		row.appendChild(cell);
+	}
+
+	// add the row to the end of the table body
+	tblBody.appendChild(row);
+
+	// put the <tbody> in the <table>
+	tbl.appendChild(tblBody);
+	// appends <table> into <body>
+	document.body.appendChild(tbl);
+	// sets the border attribute of tbl to '2'
+	tbl.setAttribute("border", "2");
+}
+
 App = {
 	web3Provider: null,
 	contract: null,
-	deployedAddress: null,
+	deployedAddress: '0x5e40c3784467A0cFed66cB4Da8F90a79Dc51b68e',
 	
 	manufacturerAccount: null,
-	distributerAccount: null,
 	retailerAccount: null,
 
 	init: async function() {
@@ -15,14 +53,14 @@ App = {
 
 		// Modern dapp browsers...
 		if (window.ethereum) {
-		App.web3Provider = window.ethereum;
-		try {
-			// Request account access
-			await window.ethereum.enable();
-		} catch (error) {
-			// User denied account access...
-			console.error("User denied account access")
-		}
+			App.web3Provider = window.ethereum;
+			try {
+				// Request account access
+				await window.ethereum.enable();
+			} catch (error) {
+				// User denied account access...
+				console.error("User denied account access")
+			}
 		}
 		// Legacy dapp browsers...
 		else if (window.web3) {
@@ -32,22 +70,12 @@ App = {
 		else {
 			App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
 		}
-		web3 = new Web3(App.web3Provider);
 
 		return App.initContract();
 	},
 
 	initContract: function() {
-
-		web3.eth.Contract.setProvider('http://localhost:8545');
-		
-		// TODO: Hide the private keys
-		App.manufacturerAccount = web3.eth.accounts.privateKeyToAccount('8667bac16679a3ca1247491657a19d762a0a207f033846f96e4fcce765889ed9');
-		App.distributerAccount = web3.eth.accounts.privateKeyToAccount('44315b8bb1ea416851065b2a3dd72541d4a1ef59f799275694fe342a1004c7db');
-		App.retailerAccount = web3.eth.accounts.privateKeyToAccount('59834eb1f8e7a6e23ab87d34089a563ab94bc1b9f79c3b8090996f4bddc49bf2');
-
-		// To change based on your smartcontract
-		App.deployedAddress = '0x1Ee18EFe7bBd127B6e0d34358c80688e079469A4';
+		web3 = new Web3(App.web3Provider);
 
 		// Get the deployed contract instance
 		var contract = new web3.eth.Contract(abi, App.deployedAddress);
@@ -62,281 +90,392 @@ App = {
 	},
 
 	bindEvents: function() {
-		$(document).on('click', '.btn-manufacturer', App.handleManufacturer);
-		$(document).on('click', '.btn-shipM', App.handleShipManufacturer);
-		$(document).on('click', '.btn-distributer', App.handleDistributer);
-		$(document).on('click', '.btn-retailTracking', App.handleRetailTracking);
-		$(document).on('click', '.btn-retailer', App.handleRetailer);
-		$(document).on('click', '.btn-customer', App.handleCustomer);
-		$(document).on('click', '.btn-customerTracking', App.handleCustomerTracking);
-		$(document).on('click', '.btn-buy', App.handleBuyProduct);	
+		$(document).on('click', App.handleButtonClick);	
 	},
 
-	handleManufacturer: function(event) {
+	handleButtonClick: async function(event) {
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+
+        switch(processId) {
+            case 1:
+                return await App.addManufacturer(event);
+            case 2:
+                return await App.addRetailer(event);
+			case 3:
+				return await App.product_added(event);
+            case 4:
+                return await App.purchased_by_retailer(event);
+            case 5:
+                return await App.shipped(event);
+            case 6:
+                return await App.received(event);
+			case 7:
+				return await App.for_sale(event);
+			case 8:
+				return await App.purchased(event);
+			case 9:
+				return await App.removed(event);
+			case 10:
+				return await App.removeManufacturer(event);
+			case 11:
+				return await App.removeRetailer(event);
+			case 12:
+				return await App.get_hist(event);
+        }
+    },
+
+	addManufacturer: async function(event) {
+        event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+        var resultTag = document.getElementById("manufacturerID").value;
+		
+		await App.contract.methods.isManufacturer(resultTag).call()
+															.then(async (result) => {
+			console.log("Manufacturer ?: ", result)
+
+			if (!result){
+				await App.contract.methods.addManufacturer(resultTag).send({ from: accountsOnEnable[0]}).then((result) => {
+					alert ('adding Address to the role: Manufacturer');
+				}).catch((error) => {console.log(error)});
+			} else {
+				console.log('Already a Manufacturer')
+				alert ('This address is already a Manufacturer');
+				return
+			}
+
+		}).catch((error) => {console.log(error)});
+
+		document.getElementById("manufacturerID").value = "";
+    },
+
+	addRetailer: async function(event) {
+        event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+        var resultTag = document.getElementById("retailerID").value;
+
+		await App.contract.methods.isRetailer(resultTag).call().then((result) => {
+
+			console.log("Retailer ?: ", result)
+
+			if (!result){
+				App.contract.methods.addRetailer(resultTag)
+									.send({from: accountsOnEnable[0]})
+									.then((result) => {
+					alert ('adding Address to the role: Retailer');
+				}).catch((error) => {console.log(error)});
+			} else {
+				console.log('Already a Retailer')
+				alert ('This address is already a Retailer');
+				return
+			}
+
+		}).catch((error) => {console.log(error)});
+
+		document.getElementById("retailerID").value = "";
+    },
+
+	removeManufacturer: async function(event) {
+        event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+        var resultTag = document.getElementById("remmanufacturerID").value;
+		
+		await App.contract.methods.isManufacturer(resultTag).call()
+															.then((result) => {
+			console.log("Manufacturer ?: ", result)
+
+			if (!result){
+				alert ('This Address is not a Manufacturer');
+			} else {
+				App.contract.methods.renounceManufacturer(resultTag)
+									.send({ from: accountsOnEnable[0]})
+									.catch((error) => {console.log(error)});
+			}
+
+		}).catch((error) => {console.log(error)});
+
+		document.getElementById("remmanufacturerID").value = "";
+    },
+
+	removeRetailer: async function(event) {
+        event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+        var resultTag = document.getElementById("remretailerID").value;
+
+		await App.contract.methods.isRetailer(resultTag).call().then((result) => {
+
+			console.log("Retailer ?: ", result)
+
+			if (!result){
+				alert ('This Address is not a Retailer');
+			} else {
+				App.contract.methods.renounceRetailer(resultTag)
+									.send({ from: accountsOnEnable[0]})
+									.catch((error) => {console.log(error)});
+			}
+
+		}).catch((error) => {console.log(error)});
+
+		document.getElementById("remretailerID").value = "";
+    },
+
+	product_added: async function(event) {
 		event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+		var upc = document.getElementById('UPC').value;
+		var name = document.getElementById('name').value;
+		var qty = document.getElementById('qty').value;
+		var price = document.getElementById('price').value;
 
-		var productID = document.getElementById('productIDM').value;
-		var product = document.getElementById('productM').value;
-		var brand = document.getElementById('brandM').value;
-		var locationM = document.getElementById('locationM').value;
+		await App.contract.methods.add_product(upc,name,qty,price)
+							.send({from: accountsOnEnable[0]})
+							.then((result) => {
 
-		App.contract.methods.addProduct({productID: parseInt(productID)}, {product: product}, {brand: brand}, {locationM: locationM})
-			.send({from: App.manufacturerAccount.address, gas: 21064}, function(error, hash){
-			web3.eth.getTransaction(hash, function(err, tx) {
+			for (var i=0; i<parseInt(qty); i++){
+				id = (parseInt(upc) + i)
 				var t = "";
-				var tr = "<tr>";
+				var tr = "<tr id=\""+id+"\">";
+				tr += "<td>"+id+"</td>";
+				tr += "<td>"+name+"</td>";
+				tr += "<td>"+price+"</td>";
 				tr += "<td>"+"Manufacturer"+"</td>";
-				tr += "<td>"+document.getElementById('productIDM').value+"</td>";
-				tr += "<td>"+tx.hash+"</td>";
-				tr += "<td>"+"New Product Created!!"+"</td>";
+				tr += "<td>"+accountsOnEnable[0]+"</td>";
+				tr += "<td>"+"For sale"+"</td>";
 				tr += "</tr>";
 				t += tr;
 				document.getElementById("posts").innerHTML += t;
-			});
-		});
+			} 
+
+		}).catch((error) => {console.log(error)});
+
+		document.getElementById('UPC').value = "";
+		document.getElementById('name').value = "";
+		document.getElementById('qty').value = "";
+		document.getElementById('price').value = "";
 	},
-	handleShipManufacturer: function(event) {
+
+	purchased_by_retailer: async function(event) {
 		event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
 
-		var productID = document.getElementById('productIDM').value;
-		var agency = document.getElementById('tAgency').value;
-		var destAddr = document.getElementById('destAddr').value;
-		
+		var table = document.getElementById("posts")
+		var upc = document.getElementById('UPC_buy').value;
+		var rows = table.rows;
+		var row = document.getElementById(upc);
+		var name = row.cells[1].innerHTML;
+		var price = row.cells[2].innerHTML;
+		var index = get_row_index(rows, row);
 
-		App.contract.methods.shipProduct({productID: parseInt(productID)}, {transportAgencyName: agency}, {destAddress: destAddr}, {partType: 0}, {ownerAddr: App.distributerAccount.address})
-			.send({from: App.distributerAccount.address, gas: 21064}, function(error, hash){
-			web3.eth.getTransaction(hash, function(err, tx) {
-				var t = "";
-				var tr = "<tr>";
-				tr += "<td>"+"Manufacturer"+"</td>";
-				tr += "<td>"+document.getElementById('productIDM').value+"</td>";
-				tr += "<td>"+tx.hash+"</td>";
-				tr += "<td>"+"Shipped to Distributer"+"</td>";
-				tr += "</tr>";
-				t += tr;
-				document.getElementById("posts").innerHTML += t;
-				console.log("Prova");
-			});
-			});
+		await App.contract.methods.buy_from_manufacturer(upc)
+							.send({from: accountsOnEnable[0]})
+							.then((result) => {
 
-	},
-	handleDistributer: function(event) {
-		event.preventDefault();
+			table.deleteRow(index);
 
-		var productID = document.getElementById('productIDD').value;
-		var agency = document.getElementById('transportD').value;
-		var destAddr = document.getElementById('destAddrD').value;
-
-		App.contract.methods.shipProduct({productID: parseInt(productID)}, {transportAgencyName: agency}, {destAddress: destAddr}, {partType: 0}, {ownerAddr: App.retailerAccount.address})
-			.send({from: App.distributerAccount.address, gas: 21064}, function(error, hash){			
-			web3.eth.getTransaction(hash, function(err, tx) {
-				var t = "";
-				var tr = "<tr>";
-				tr += "<td>"+"Distributer"+"</td>";
-				tr += "<td>"+document.getElementById('productIDD').value+"</td>";
-				tr += "<td>"+tx.hash+"</td>";
-				tr += "<td>"+"Shipped to Retailer"+"</td>";
-				tr += "</tr>";
-				t += tr;
-				document.getElementById("posts").innerHTML += t;
-			});
-		});
-
-	},
-	handleRetailTracking: function(event) {
-		event.preventDefault();
-
-		var productID = document.getElementById('productIDRT').value;	
-
-		App.contract.methods.listAllTrackInfo({productID: parseInt(productID)})
-			.call({from: App.retailerAccount.address, gas: 21064}, function(result) {
 			var t = "";
-			document.getElementById("trackInfo").innerHTML = t;
-			var newRow=document.getElementById('trackInfo').insertRow();
-			newRow.innerHTML = "<th id=\"test\" style=\"width: 112px; text-align: center;\"><span style=\"color: #993366;\">Owner</span></th><th style=\"width: 144px; text-align: center;\"><span style=\"color: #993366;\">Location</span></th><th style=\"width: 130.4px; text-align: center;\"><span style=\"color: #993366;\">Description</span></th><th style=\"width: 87.2px; text-align: center;\"><span style=\"color: #993366;\">Time</span></th>";
-			var tr;
-			console.log(result);
-			for(i=1;i<=result.length;i++) {
-				if((i%4==1) ) {
-					
-					tr = "<tr>";
-				}
-				if((i%4) == 0) {
-					var ts = new Date(parseInt(result[i-1]));
-					console.log(ts.toString());
-					tr += "<td>"+ts.toString()+"</td>";
-				} else {
-					console.log(web3.toAscii(result[i-1]));
-					tr += "<td>"+web3.toAscii(result[i-1])+"</td>";
-					
-				}
-				if((i%4==0)) {
-					tr += "</tr>";
-					t += tr;
-					//console.log(t)
-					//document.getElementById("trackInfo").innerHTML += t;
-				}
-					
-			}	
-			document.getElementById("trackInfo").innerHTML += t;	
-		}).catch(function(err) {
-			console.log(err.message);
-		});
+			var tr = "<tr id=\""+upc+"\">";
+			tr += "<td>"+upc+"</td>";
+			tr += "<td>"+name+"</td>";
+			tr += "<td>"+price+"</td>";
+			tr += "<td>"+"Retailer"+"</td>";
+			tr += "<td>"+accountsOnEnable[0]+"</td>";
+			tr += "<td>"+"Bought"+"</td>";
+			tr += "</tr>";
+			t += tr;
+			table.innerHTML += t;
+
+		}).catch((error) => {console.log(error)});
+
+		document.getElementById('UPC_buy').value = "";
 	},
-	handleRetailer: function(event) {
+
+	shipped: async function(event) {
 		event.preventDefault();
-
-		var productID = document.getElementById('productIDR').value;
-		var agency = document.getElementById('transportR').value;
-		var destAddr = document.getElementById('destAddrR').value;
-		var price = document.getElementById('priceR').value;
-		var retailInstance;
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+		var table = document.getElementById("posts")
+		var upc = document.getElementById('UPC_ship').value;
+		var rows = table.rows;
+		var row = document.getElementById(upc);
+		var name = row.cells[1].innerHTML;
+		var price = row.cells[2].innerHTML;
+		var index = get_row_index(rows, row);
 		
-		web3.eth.getAccounts(function(error, accounts) {
-		if (error) {
-			console.log(error);
-		}
 
-		var account = accounts[0];
-		App.contracts.RetailSupplyChain.deployed().then(function(instance) {
-			retailInstance = instance;
-			retailInstance.sellProduct.sendTransaction(productID, agency, destAddr, price).then(function(hash) {
-			console.log("Ship to Customer",hash);	
-			web3.eth.getTransaction(hash, function(err, tx) {
-				var t = "";
-				var tr = "<tr>";
-				tr += "<td>"+"Retailer"+"</td>";
-				tr += "<td>"+document.getElementById('productIDR').value+"</td>";
-				tr += "<td>"+tx.hash+"</td>";
-				tr += "<td>"+"Shipped to Customer"+"</td>";
-				tr += "</tr>";
-				t += tr;
-				document.getElementById("posts").innerHTML += t;
-			});
-			});
-		}).then(function(result) {
-		}).catch(function(err) {
-			console.log(err.message);
-		});
-		});
-	},
-	handleCustomer: function(event) {
-		event.preventDefault();
+		await App.contract.methods.ship_item(upc)
+							.send({from: accountsOnEnable[0]})
+							.then((result) => {
+					
+			table.deleteRow(index);
 
-		var productID = document.getElementById('productIDC').value;
-		var destAddr = document.getElementById('destAddrC').value;
-		
-		var custInstance;
-		
-		web3.eth.getAccounts(function(error, accounts) {
-		if (error) {
-			console.log(error);
-		}
-
-		var account = accounts[0];
-		App.contracts.RetailSupplyChain.deployed().then(function(instance) {
-			custInstance = instance;
-			custInstance.updateTrackInfo.sendTransaction(productID, 3, destAddr, "Product Arrived").then(function(hash) {
-			web3.eth.getTransaction(hash, function(err, tx) {
-				var t = "";
-				var tr = "<tr>";
-				tr += "<td>"+"Customer"+"</td>";
-				tr += "<td>"+document.getElementById('productIDC').value+"</td>";
-				tr += "<td>"+tx.hash+"</td>";
-				tr += "<td>"+"Arrived at Customer"+"</td>";
-				tr += "</tr>";
-				t += tr;
-				document.getElementById("posts").innerHTML += t;
-			});
-			});
-		}).then(function(result) {
-		}).catch(function(err) {
-			console.log(err.message);
-		});
-		});
-	},
-	handleCustomerTracking: function(event) {
-		event.preventDefault();
-
-		var productID = document.getElementById('productIDCT').value;	
-		var customerInstance;
-		console.log("customer called");
-		web3.eth.getAccounts(function(error, accounts) {
-		if (error) {
-			console.log(error);
-		}
-
-		var account = accounts[0];
-		var len;
-		App.contracts.RetailSupplyChain.deployed().then(function(instance) {
-			customerInstance = instance;
-			console.log("customer listAllTrackInfo");
-			return customerInstance.listAllTrackInfo.call(productID);		
-		}).then(function(result) {
 			var t = "";
-			document.getElementById("trackInfo").innerHTML = t;
-			var newRow=document.getElementById('trackInfo').insertRow();
-			newRow.innerHTML = "<th id=\"test\" style=\"width: 112px; text-align: center;\"><span style=\"color: #993366;\">Owner</span></th><th style=\"width: 144px; text-align: center;\"><span style=\"color: #993366;\">Location</span></th><th style=\"width: 130.4px; text-align: center;\"><span style=\"color: #993366;\">Description</span></th><th style=\"width: 87.2px; text-align: center;\"><span style=\"color: #993366;\">Time</span></th>";
-			var tr;
-			console.log(result);
-			for(i=1;i<=result.length;i++) {
-				if((i%4==1) ) {
-					
-					tr = "<tr>";
-				}
-				if((i%4) == 0) {
-					var ts = new Date(parseInt(result[i-1]));
-					console.log(ts.toString());
-					tr += "<td>"+ts.toString()+"</td>";
-				} else {
-					console.log(web3.toAscii(result[i-1]));
-					tr += "<td>"+web3.toAscii(result[i-1])+"</td>";
-					
-				}
-				if((i%4==0)) {
-					tr += "</tr>";
-					t += tr;
-					//console.log(t)
-					//document.getElementById("trackInfo").innerHTML += t;
-				}
-					
-			}	
-			document.getElementById("trackInfo").innerHTML += t;	
-		}).catch(function(err) {
-			console.log(err.message);
-		});
-		});
+			var tr = "<tr id=\""+upc+"\">";
+			tr += "<td>"+upc+"</td>";
+			tr += "<td>"+name+"</td>";
+			tr += "<td>"+price+"</td>";
+			tr += "<td>"+"Retailer"+"</td>";
+			tr += "<td>"+accountsOnEnable[0]+"</td>";
+			tr += "<td>"+"Shipped"+"</td>";
+			tr += "</tr>";
+			t += tr;
+			table.innerHTML += t;
+
+		}).catch((error) => {console.log(error)});
+		
+		document.getElementById('UPC_ship').value = "";
 	},
-	handleBuyProduct: function(event) {
+
+	received: async function(event) {
 		event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
 
-		var productID = document.getElementById('productIDCT').value;
+		var table = document.getElementById("posts")
+		var upc = document.getElementById('UPC_ship').value;
+		var rows = table.rows;
+		var row = document.getElementById(upc);
+		var name = row.cells[1].innerHTML;
+		var price = row.cells[2].innerHTML;
+		var index = get_row_index(rows, row);
 		
-		var customerInstance;
 
-		web3.eth.getAccounts(function(error, accounts) {
-		if (error) {
-			console.log(error);
-		}
+		await App.contract.methods.received_item(upc)
+							.send({from: accountsOnEnable[0]})
+							.then((result) => {
 
-		var account = accounts[0];
+			table.deleteRow(index);
+
+			var t = "";
+			var tr = "<tr id=\""+upc+"\">";
+			tr += "<td>"+upc+"</td>";
+			tr += "<td>"+name+"</td>";
+			tr += "<td>"+price+"</td>";
+			tr += "<td>"+"Retailer"+"</td>";
+			tr += "<td>"+accountsOnEnable[0]+"</td>";
+			tr += "<td>"+"Received"+"</td>";
+			tr += "</tr>";
+			t += tr;
+			table.innerHTML += t;
+
+		}).catch((error) => {console.log(error)});
 		
-		App.contracts.RetailSupplyChain.deployed().then(function(instance) {
-			customerInstance = instance;
-			return customerInstance.getSellerAddress.call(productID);
+		document.getElementById('UPC_ship').value = "";
+	},
+
+	received: async function(event) {
+		event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+
+		var table = document.getElementById("posts");
+		var upc = document.getElementById('UPC_receive').value;
+		var rows = table.rows;
+		var row = document.getElementById(upc);
+		var name = row.cells[1].innerHTML;
+		var price = row.cells[2].innerHTML;
+		var index = get_row_index(rows, row);
+		
+
+		await App.contract.methods.received_item(upc)
+							.send({from: accountsOnEnable[0]})
+							.then((result) => {
+
+			table.deleteRow(index);
+
+			var t = "";
+			var tr = "<tr id=\""+upc+"\">";
+			tr += "<td>"+upc+"</td>";
+			tr += "<td>"+name+"</td>";
+			tr += "<td>"+price+"</td>";
+			tr += "<td>"+"Retailer"+"</td>";
+			tr += "<td>"+accountsOnEnable[0]+"</td>";
+			tr += "<td>"+"Received"+"</td>";
+			tr += "</tr>";
+			t += tr;
+			table.innerHTML += t;
+		
+		}).catch((error) => {console.log(error)});
+
+		document.getElementById('UPC_receive').value = "";
+	},
+	
+	for_sale: async function(event) {
+		event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+
+		var table = document.getElementById("posts");
+		var upc = document.getElementById('UPC_sell').value;
+		var price = document.getElementById('Price_sell').value;
+		var rows = table.rows;
+		var row = document.getElementById(upc);
+		var name = row.cells[1].innerHTML;
+		var index = get_row_index(rows, row);
+		
+
+		await App.contract.methods.sell_item(upc, price)
+							.send({from: accountsOnEnable[0]})
+							.then((result) => {
+
+			table.deleteRow(index);
+
+			var t = "";
+			var tr = "<tr id=\""+upc+"\">";
+			tr += "<td>"+upc+"</td>";
+			tr += "<td>"+name+"</td>";
+			tr += "<td>"+price+"</td>";
+			tr += "<td>"+"Retailer"+"</td>";
+			tr += "<td>"+accountsOnEnable[0]+"</td>";
+			tr += "<td>"+"for sale"+"</td>";
+			tr += "</tr>";
+			t += tr;
+			table.innerHTML += t;
+
+		}).catch((error) => {console.log(error)});
+		
+		document.getElementById('UPC_sell').value = "";
+		document.getElementById('Price_sell').value = "";
+	},
+
+	removed: async function(event) {
+		event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+
+		var table = document.getElementById("posts");
+		var upc = document.getElementById('UPC_remove').value;
+		var rows = table.rows;
+		var row = document.getElementById(upc);
+		var index = get_row_index(rows, row);
+		
+
+		await App.contract.methods.remove_product(upc)
+							.send({from: accountsOnEnable[0]})
+							.then((result) => {
+
+			if (index != -1){
+				table.deleteRow(index);
+			} else {
+				alert ("Product not found!")
+			}
+		}).catch((error) => {console.log(error)});
+
+		document.getElementById('UPC_remove').value = "";
+	},
+
+	get_hist: async function(event) {
+		event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+
+		var upc = document.getElementById('upc_hist').value;
+
+		await App.contract.methods.get_history(upc)
+							.call({from: accountsOnEnable[0]})
+							.then((result) => {
 			
-		}).then(function(result) {
-			console.log("BUY Product",result);
-			customerInstance.buyProduct.sendTransaction( productID, {
-														from:account,to:result,//contracts address
-														value: web3.toWei(document.getElementById('amount').value, 'ether')//EtherAmount=>how much ether you want to move
-			});
-		}).catch(function(err) {
-			console.log(err.message);
-		});
-		});
-	}
+			var len = result.length;
+			console.log(result)
+			generate_table(len);
+			
+		}).catch((error) => {console.log(error)});
 
+		document.getElementById('upc_hist').value = "";
+	},
 };
 
 $(function() {
