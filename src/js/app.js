@@ -9,25 +9,58 @@ function get_row_index(rows, row) {
 	return index;
 }
 
-function generate_table(len) {
+function get_time(unix_time){
+	var a = new Date(unix_time * 1000);
+	var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+	var year = a.getFullYear();
+	var month = months[a.getMonth()];
+	var date = a.getDate();
+	var hour = a.getHours();
+	var min = a.getMinutes();
+	var sec = a.getSeconds();
+	var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+	return time;
+}
+
+function generate_table(result) {
 	// creates a <table> element and a <tbody> element
 	const tbl = document.createElement("table");
+	tbl.setAttribute("id", "table_history");
 	const tblBody = document.createElement("tbody");
 
-	const row = document.createElement("tr");
+	var len = result.length;
 
-	for (let j = 0; j < len; j++) {
-		// Create a <td> element and a text node, make the text
-		// node the contents of the <td>, and put the <td> at
-		// the end of the table row
-		const cell = document.createElement("td");
-		const cellText = document.createTextNode(`column ${j}`);
-		cell.appendChild(cellText);
-		row.appendChild(cell);
-	}
-
-	// add the row to the end of the table body
+	// Setting header
+	var row = document.createElement("tr");
+	var cell = document.createElement("th");
+	cell.setAttribute("style", "color: #808000")
+	var cellText = document.createTextNode("Owner address");
+	cell.appendChild(cellText);
+	row.appendChild(cell);
+	cell = document.createElement("th");
+	cell.setAttribute("style", "color: #808000")
+	cellText = document.createTextNode("Timestamp of the block");
+	cell.appendChild(cellText);
+	row.appendChild(cell);
 	tblBody.appendChild(row);
+
+	// Populating the table
+	for (let i = 0; i < len; i++) {
+		row = document.createElement("tr");
+
+		for (let j = 0; j < 2; j++) {
+			cell = document.createElement("td");
+			if (j == 0)
+				cellText = document.createTextNode(result[0].owner);
+			else
+				cellText = document.createTextNode(get_time(result[0].time));
+			cell.appendChild(cellText);
+			row.appendChild(cell);
+		}
+
+		// add the row to the end of the table body
+		tblBody.appendChild(row);
+	}
 
 	// put the <tbody> in the <table>
 	tbl.appendChild(tblBody);
@@ -40,7 +73,7 @@ function generate_table(len) {
 App = {
 	web3Provider: null,
 	contract: null,
-	deployedAddress: '0x5e40c3784467A0cFed66cB4Da8F90a79Dc51b68e',
+	deployedAddress: '0x7D28d3cD1f99c0527550C51A429b40B2Fc26f262',
 	
 	manufacturerAccount: null,
 	retailerAccount: null,
@@ -122,13 +155,21 @@ App = {
 				return await App.removeRetailer(event);
 			case 12:
 				return await App.get_hist(event);
+			case 13:
+				return await App.buy_client(event);
+			case 14:
+				return await App.ship_client(event);
+			case 15:
+				return await App.received_client(event);
+			case 16:
+				return await App.sell_client(event);
         }
     },
 
 	addManufacturer: async function(event) {
         event.preventDefault();
 		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
-        var resultTag = document.getElementById("manufacturerID").value;
+        var resultTag = document.getElementById("manufacturerID").value;		
 		
 		await App.contract.methods.isManufacturer(resultTag).call()
 															.then(async (result) => {
@@ -328,42 +369,6 @@ App = {
 		event.preventDefault();
 		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
 
-		var table = document.getElementById("posts")
-		var upc = document.getElementById('UPC_ship').value;
-		var rows = table.rows;
-		var row = document.getElementById(upc);
-		var name = row.cells[1].innerHTML;
-		var price = row.cells[2].innerHTML;
-		var index = get_row_index(rows, row);
-		
-
-		await App.contract.methods.received_item(upc)
-							.send({from: accountsOnEnable[0]})
-							.then((result) => {
-
-			table.deleteRow(index);
-
-			var t = "";
-			var tr = "<tr id=\""+upc+"\">";
-			tr += "<td>"+upc+"</td>";
-			tr += "<td>"+name+"</td>";
-			tr += "<td>"+price+"</td>";
-			tr += "<td>"+"Retailer"+"</td>";
-			tr += "<td>"+accountsOnEnable[0]+"</td>";
-			tr += "<td>"+"Received"+"</td>";
-			tr += "</tr>";
-			t += tr;
-			table.innerHTML += t;
-
-		}).catch((error) => {console.log(error)});
-		
-		document.getElementById('UPC_ship').value = "";
-	},
-
-	received: async function(event) {
-		event.preventDefault();
-		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
-
 		var table = document.getElementById("posts");
 		var upc = document.getElementById('UPC_receive').value;
 		var rows = table.rows;
@@ -390,17 +395,18 @@ App = {
 			tr += "</tr>";
 			t += tr;
 			table.innerHTML += t;
-		
-		}).catch((error) => {console.log(error)});
 
+		}).catch((error) => {console.log(error)});
+		
 		document.getElementById('UPC_receive').value = "";
-	},
+	},		
 	
 	for_sale: async function(event) {
 		event.preventDefault();
 		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
 
 		var table = document.getElementById("posts");
+		var table_client = document.getElementById("client_products")
 		var upc = document.getElementById('UPC_sell').value;
 		var price = document.getElementById('Price_sell').value;
 		var rows = table.rows;
@@ -425,7 +431,7 @@ App = {
 			tr += "<td>"+"for sale"+"</td>";
 			tr += "</tr>";
 			t += tr;
-			table.innerHTML += t;
+			table_client.innerHTML += t;
 
 		}).catch((error) => {console.log(error)});
 		
@@ -464,17 +470,165 @@ App = {
 
 		var upc = document.getElementById('upc_hist').value;
 
+		// Remove previous table if it exist
+		var tab = document.getElementById('table_history')
+		if (tab){
+			var parentEl = tab.parentElement;
+			parentEl.removeChild(tab);
+		}
+
 		await App.contract.methods.get_history(upc)
 							.call({from: accountsOnEnable[0]})
 							.then((result) => {
 			
-			var len = result.length;
-			console.log(result)
-			generate_table(len);
+			generate_table(result);
 			
 		}).catch((error) => {console.log(error)});
 
 		document.getElementById('upc_hist').value = "";
+	},
+
+	buy_client: async function(event) {
+		event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+
+		var table = document.getElementById("client_products")
+		var upc = document.getElementById('UPC_buy_client').value;
+		var rows = table.rows;
+		var row = document.getElementById(upc);
+		var name = row.cells[1].innerHTML;
+		var price = row.cells[2].innerHTML;
+		var index = get_row_index(rows, row);
+
+		await App.contract.methods.buy_product(upc)
+								  .send({from: accountsOnEnable[0]})
+								  .then((result) => {
+
+			table.deleteRow(index);
+
+			var t = "";
+			var tr = "<tr id=\""+upc+"\">";
+			tr += "<td>"+upc+"</td>";
+			tr += "<td>"+name+"</td>";
+			tr += "<td>"+price+"</td>";
+			tr += "<td>"+"Retailer"+"</td>";
+			tr += "<td>"+accountsOnEnable[0]+"</td>";
+			tr += "<td>"+"Bought"+"</td>";
+			tr += "</tr>";
+			t += tr;
+			table.innerHTML += t;
+
+		}).catch((error) => {console.log(error)});
+
+		document.getElementById('UPC_buy_client').value = "";
+	},
+
+	ship_client: async function(event) {
+		event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+		var table = document.getElementById("client_products")
+		var upc = document.getElementById('UPC_ship_client').value;
+		var rows = table.rows;
+		var row = document.getElementById(upc);
+		var name = row.cells[1].innerHTML;
+		var price = row.cells[2].innerHTML;
+		var index = get_row_index(rows, row);
+		
+
+		await App.contract.methods.ship_item(upc)
+							.send({from: accountsOnEnable[0]})
+							.then((result) => {
+					
+			table.deleteRow(index);
+
+			var t = "";
+			var tr = "<tr id=\""+upc+"\">";
+			tr += "<td>"+upc+"</td>";
+			tr += "<td>"+name+"</td>";
+			tr += "<td>"+price+"</td>";
+			tr += "<td>"+"Retailer"+"</td>";
+			tr += "<td>"+accountsOnEnable[0]+"</td>";
+			tr += "<td>"+"Shipped"+"</td>";
+			tr += "</tr>";
+			t += tr;
+			table.innerHTML += t;
+
+		}).catch((error) => {console.log(error)});
+		
+		document.getElementById('UPC_ship_client').value = "";
+	},
+
+	received_client: async function(event) {
+		event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+
+		var table = document.getElementById("client_products");
+		var upc = document.getElementById('UPC_receive_client').value;
+		var rows = table.rows;
+		var row = document.getElementById(upc);
+		var name = row.cells[1].innerHTML;
+		var price = row.cells[2].innerHTML;
+		var index = get_row_index(rows, row);
+		
+
+		await App.contract.methods.received_item(upc)
+							.send({from: accountsOnEnable[0]})
+							.then((result) => {
+
+			table.deleteRow(index);
+
+			var t = "";
+			var tr = "<tr id=\""+upc+"\">";
+			tr += "<td>"+upc+"</td>";
+			tr += "<td>"+name+"</td>";
+			tr += "<td>"+price+"</td>";
+			tr += "<td>"+"Retailer"+"</td>";
+			tr += "<td>"+accountsOnEnable[0]+"</td>";
+			tr += "<td>"+"Received"+"</td>";
+			tr += "</tr>";
+			t += tr;
+			table.innerHTML += t;
+
+		}).catch((error) => {console.log(error)});
+		
+		document.getElementById('UPC_receive').value = "";
+	},	
+	
+	sell_client: async function(event) {
+		event.preventDefault();
+		var accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+
+		var table_client = document.getElementById("client_products")
+		var upc = document.getElementById('UPC_sell_client').value;
+		var price = document.getElementById('Price_sell_client').value;
+		var rows = table.rows;
+		var row = document.getElementById(upc);
+		var name = row.cells[1].innerHTML;
+		var index = get_row_index(rows, row);
+		
+
+		await App.contract.methods.sell_item(upc, price)
+							.send({from: accountsOnEnable[0]})
+							.then((result) => {
+
+			table.deleteRow(index);
+
+			var t = "";
+			var tr = "<tr id=\""+upc+"\">";
+			tr += "<td>"+upc+"</td>";
+			tr += "<td>"+name+"</td>";
+			tr += "<td>"+price+"</td>";
+			tr += "<td>"+"Retailer"+"</td>";
+			tr += "<td>"+accountsOnEnable[0]+"</td>";
+			tr += "<td>"+"for sale"+"</td>";
+			tr += "</tr>";
+			t += tr;
+			table_client.innerHTML += t;
+
+		}).catch((error) => {console.log(error)});
+		
+		document.getElementById('UPC_sell_client').value = "";
+		document.getElementById('Price_sell_client').value = "";
 	},
 };
 

@@ -1,31 +1,74 @@
 var abi = [
 	{
+		"anonymous": false,
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "upc",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "productName",
-				"type": "string"
-			},
-			{
-				"internalType": "uint8",
-				"name": "quantity",
-				"type": "uint8"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
+				"indexed": true,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
 			}
 		],
-		"name": "add_product",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
+		"name": "ManufacturerAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "ManufacturerRemoved",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "RetailerAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "RetailerRemoved",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "oldOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "TransferOwnership",
+		"type": "event"
 	},
 	{
 		"inputs": [
@@ -59,16 +102,38 @@ var abi = [
 				"internalType": "uint256",
 				"name": "upc",
 				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "productName",
+				"type": "string"
+			},
+			{
+				"internalType": "uint8",
+				"name": "quantity",
+				"type": "uint8"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "add_product",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "upc",
+				"type": "uint256"
 			}
 		],
 		"name": "buy_from_manufacturer",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
+		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
 	},
@@ -84,180 +149,6 @@ var abi = [
 		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"name": "ManufacturerAdded",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"name": "ManufacturerRemoved",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "upc",
-				"type": "uint256"
-			}
-		],
-		"name": "received_item",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "upc",
-				"type": "uint256"
-			}
-		],
-		"name": "remove_product",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"name": "renounceManufacturer",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "renounceOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"name": "renounceRetailer",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"name": "RetailerAdded",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"name": "RetailerRemoved",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "upc",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			}
-		],
-		"name": "sell_item",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "upc",
-				"type": "uint256"
-			}
-		],
-		"name": "ship_item",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "oldOwner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "TransferOwnership",
-		"type": "event"
 	},
 	{
 		"inputs": [
@@ -352,6 +243,109 @@ var abi = [
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "upc",
+				"type": "uint256"
+			}
+		],
+		"name": "received_item",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "upc",
+				"type": "uint256"
+			}
+		],
+		"name": "remove_product",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "renounceManufacturer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "renounceOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "renounceRetailer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "upc",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "sell_item",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "upc",
+				"type": "uint256"
+			}
+		],
+		"name": "ship_item",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]
