@@ -1,85 +1,74 @@
-This fork of the original project is used to experiment with the newly implemented smart contract on the IOTA blockchain. While the OP used Truffle for testing and deploying of the smart contract, it is not available for the IOTA and had to pivot to Hardhat.
+# Supply chain Smart Contract deployed on IOTA 2.0
 
-#### Problems in Existing System
+Project for the Blockchain and cryptocurrency exam. The project consist in the creation of a smart contract for managing a very compact supply chain. The deployment is done on the IOTA 2.0 testnet, available at the moment of writing. The idea behind the implementation comes from the [Colnago](https://www.colnago.com/stories/colnago-first-bicycle-manufacturer-to-adopt-blockchain) announcement, where products with a unique identifiers can be tracked across the supply chain using blockchain technology. The smart contract present in this repo, tries to provide a possible solution in a very simplified manner, allowing to track a product from the manufacturer to the client and being able at every step to verify its origin.
+
+## Problems in Existing System
 ---
 
 - Currently tracking, selling, purchasing of product in traditional systems can not be trusted.
 
 - Blockchain can solve this by providing immutable and verifiable data sources
 
-#### What we are providing?
+## What this project provide?
 ---
 
-- We have implemented smart contract storing the product details shipping to various participants also can be tracked by the customer
+An implementation of a smart contract for storing the product details across the supply chain and verifying the authenticity of that product during every step.
 
-#### Workflow Diagram one
+## Included Components
+
 ---
-![](img/Manufacturer-Distributer-Retailer.jpg)
 
-Here, the Manufacturer creates a new product and ships to the distributer.
-The distributer ships to retailer. The retailer can also view the history of tracking details of specific product.
+- Solidity (Ethereum language)
+- Metamask (Ethereum wallet)
+- Web3JS
 
-#### Workflow Diagram two
+## Prerequisites
+
 ---
-![](img/Retail-Customer.jpg)
-Once the customer places an order, the retailer ships the product to customer at a specific price.
-The customer can also view the history of tracking details of the specific product.
-Customer later pays the amount to the retailer once it receives the product.
-The transport agent updates the details of the destination customer address.
 
-#### Included Components
----
-- Wasp (IOTA)
--  Solidity (Ethereum)
--  Metamask  (Ethereum wallet)
--  Hardhat
--  Web3JS
-
-#### Prerequisites
----
-- Nodejs v9.10 or above
-- hardhat-ethers v2.0 or above
+- Nodejs v18.0 or above
 - Solidity v0.8.0 or above
-- Metamask (https://metamask.io) /Ganache Wallet
-- npm install
+- [Metamask](https://metamask.io) set with the IOTA testnet network  
 
-#### Deployment Steps:
+## Deployment Steps
+
 ---
-**Setting up Ethereum Smart Contract:**
 
-```
-git clone https://github.com/anithakc6/RetailSupplyChainEthereum.git
+Load the smart contracts on Remix (which is supported by IOTA) compile and deploy them to the IOTA testnet. See the [IOTA smart contract wiki](https://wiki.iota.org/smart-contracts/overview) for more details
+
+Clone the repository locally and move into it
+
+```bash
+git clone https://github.com/treyvian/BlockchainRetailSupplyChain.git
 cd RetailSupplyChainEthereum/
 ```
-Go to your project folder in terminal then execute :
 
+Copy the address on which the contract is deployed and past it in the file **src/js/app.js** in the **deployedAddress** variable.
+
+start the front end by running:
+
+```bash
+npm run dev
 ```
-npx hardhat compile
-npx hardhat run --network localhost scripts/deploy.js
-Connect Metamask to Ganache URL http://localhost:7545
-```
-#### Application Workflow Diagram One
----
-![](img/Workflow1.jpg)
 
-#### In this application we have three stages
+Interact with the smart contract via the web page
+
+## This application supports three roles for an account
+
 ---
 
-1. Manufacturer
-2. Distributor
-3. Retailer
+- Owner
+- Manufacturer
+- Retailer
 
-**Manufacturer :** Manufacturer creates a new product.
+**Owner of the contract :** it is the which execute the transaction to deploy the contract. It is basically a super-user, it can add Roles to  other accounts can remove product from memory and execute every action available in the front end of the application.
 
-**Warehouse :** Manufacturing warehouse ships the product to the distributer.
+**Manufacturer :** It has the ability to create new product and store them in memory
 
-**Distributor :** Distributor ships the product to the retailer.
+**Retailer :** It can buy products directly from the Manufacturer and resell them to the general public.
 
-**Retailer :** Retailer can verify the history of product tracking.
+Every other account that has no role, can only buy products sold by the Retailers.
 
-#### Application Workflow Diagram Two
----
-![](img/Workflow2.jpg)
 
 #### In this application we have two stages
 ---
@@ -92,44 +81,3 @@ Connect Metamask to Ganache URL http://localhost:7545
 **Customer :** Once received pays the amount to the retailer. Also can view the tracking history.
 
 **Transport Agent :** The transport agent updates the destination address , once the product is reached to the customer.
-
-#### Development Screen's
----
-
-#### Create Product
----
-![](img/CreateProduct.jpg)
-
-- Create Product -> Update all the details of the new product.
-
-#### Product Transactions Lists
----
-![](img/ProductCreatedTableUpdated.jpg)
-
-- Table of entries of all the transactions of creating, shipping, selling of the product is displayed here.
-- Metamask account - Checkout for the metamask account details below.
-
-#### Distributor Ship Product(Similar transactions for Manufacturer/Retailer)
----
-![](img/DistributerShipProduct.jpg)
-
-- Ship Product - Update all the details.
-- Metamask account - Checkout for the metamask account details below.
-
-#### Product Tracking
----
-![](img/ProductTrackingInfo.jpg)
-
-- Product Tracking - Update the product id to view the history of tracking details
-
-#### Buyer Wallet (Payment of 20 ethers)
----
-![](img/BuyerWalletBeforeAndAfterPayment.jpg)
-
-- Pay - Once the customer pays the amount to the retailer, verify the deduction in the Metamask wallet of the Buyer
-
-#### Retailer Wallet (Received amount)
----
-![](img/RetailerWalletAmountAfterAndBefore.jpg)
-
-- Retailer Wallet - Verify the amount added in the Metamask wallet
