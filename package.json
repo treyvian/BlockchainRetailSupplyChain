@@ -10,5 +10,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "lite-server": "^2.6.1",
+    "web3": "^1.7.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.1"
+  }
 }
