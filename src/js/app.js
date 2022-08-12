@@ -51,9 +51,9 @@ function generate_table(result) {
 		for (let j = 0; j < 2; j++) {
 			cell = document.createElement("td");
 			if (j == 0)
-				cellText = document.createTextNode(result[0].owner);
+				cellText = document.createTextNode(result[i].owner);
 			else
-				cellText = document.createTextNode(get_time(result[0].time));
+				cellText = document.createTextNode(get_time(result[i].time));
 			cell.appendChild(cellText);
 			row.appendChild(cell);
 		}
@@ -73,7 +73,7 @@ function generate_table(result) {
 App = {
 	web3Provider: null,
 	contract: null,
-	deployedAddress: '0x7D28d3cD1f99c0527550C51A429b40B2Fc26f262',
+	deployedAddress: '0x31B189Af0e3E8d0b035D15bD775f62097333c66E',
 	
 	manufacturerAccount: null,
 	retailerAccount: null,
@@ -591,7 +591,7 @@ App = {
 
 		}).catch((error) => {console.log(error)});
 		
-		document.getElementById('UPC_receive').value = "";
+		document.getElementById('UPC_receive_client').value = "";
 	},	
 	
 	sell_client: async function(event) {
@@ -601,7 +601,7 @@ App = {
 		var table_client = document.getElementById("client_products")
 		var upc = document.getElementById('UPC_sell_client').value;
 		var price = document.getElementById('Price_sell_client').value;
-		var rows = table.rows;
+		var rows = table_client.rows;
 		var row = document.getElementById(upc);
 		var name = row.cells[1].innerHTML;
 		var index = get_row_index(rows, row);
@@ -611,7 +611,7 @@ App = {
 							.send({from: accountsOnEnable[0]})
 							.then((result) => {
 
-			table.deleteRow(index);
+			table_client.deleteRow(index);
 
 			var t = "";
 			var tr = "<tr id=\""+upc+"\">";
