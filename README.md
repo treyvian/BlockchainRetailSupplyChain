@@ -68,16 +68,3 @@ Interact with the smart contract via the web page
 **Retailer :** It can buy products directly from the Manufacturer and resell them to the general public.
 
 Every other account that has no role, can only buy products sold by the Retailers.
-
-
-#### In this application we have two stages
----
-
-1. Retailer
-2. Customer
-
-**Retailer :** Retailer sells the product to the customer.
-
-**Customer :** Once received pays the amount to the retailer. Also can view the tracking history.
-
-**Transport Agent :** The transport agent updates the destination address , once the product is reached to the customer.
